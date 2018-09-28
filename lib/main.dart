@@ -117,6 +117,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
             // if (randomlyfilledin.contains(indexspace)&& currentindexspace != indexspace) {
             up = false;
             //    currentvalueX += 2;
+            wait = 0;
             indexspace = ((currentvalueY/40).floor()*10+currentvalueX/40%10.round()).toInt();
             randomlyrequiredhits[randomlyfilledin.indexOf(indexspace)] -=1;
             if (randomlyrequiredhits[randomlyfilledin.indexOf(indexspace)] ==0 ){
@@ -133,6 +134,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
           if (randomlyfilledin.contains(((currentvalueY/40).ceil()*10+currentvalueX/40%10.ceil()).toInt()) && wait>10) {
             //if (randomlyfilledin.contains(indexspace) && currentindexspace != indexspace) {
             up=true;
+            wait = 0;
             //   currentvalueX -= 2;
             indexspace = ((currentvalueY/40).ceil()*10+currentvalueX/40%10.ceil()).toInt();
             randomlyrequiredhits[randomlyfilledin.indexOf(indexspace)] -=1;
