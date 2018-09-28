@@ -43,13 +43,17 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
   List<int> randomlyrequiredhits = [];
 
   double currentvalueX = 0.0;
-  double currentvalueY = 690.0;
+  double maxYvalue = 620.0;
+  double maxXvalue = 360.0;
+  double currentvalueY = 620.0;
   int currentindexspace = 0;
   Timer timer;
   Stopwatch stopwatch = Stopwatch();
   int indexspace = 0;
   int wait = 0;
-
+  Offset position = Offset(18.0, 669.0);
+  Offset appbar = Offset(0.0, 100.0);
+  int score = 0;
 
 
   bool right  =true;
@@ -71,7 +75,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
   }
    startball() {
     currentvalueX = 0.0;
-    currentvalueY = 690.0;
+    currentvalueY = maxYvalue;
     timer?.cancel(); // cancel old timer if it exists
     //Start new timer
     timer = Timer.periodic(Duration(milliseconds:  2), (Timer timer){
@@ -84,14 +88,16 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
               print(currentindexspace);
               indexspace = ((currentvalueY/40).round()*10+currentvalueX/40.ceil()%10).toInt();
               randomlyrequiredhits[randomlyfilledin.indexOf(indexspace)] -=1;
+              score += 1;
               if (randomlyrequiredhits[randomlyfilledin.indexOf(indexspace)] ==0 ){
                 randomlyfilledin.remove(indexspace);
                 randomlyrequiredhits.remove(0);
+                if(randomlyfilledin.isEmpty) endGame();
               }
 
           }
 
-          else if (currentvalueX < 360 )currentvalueX += 1;
+          else if (currentvalueX < maxXvalue )currentvalueX += 1;
           else {
             right = false;
           }
@@ -103,9 +109,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
             right=true;
              currentvalueX += 2;
              randomlyrequiredhits[randomlyfilledin.indexOf(indexspace)] -=1;
+            score += 1;
              if (randomlyrequiredhits[randomlyfilledin.indexOf(indexspace)] ==0 ){
                randomlyfilledin.remove(indexspace);
                randomlyrequiredhits.remove(0);
+               if(randomlyfilledin.isEmpty) endGame();
              }
           }
           else if (currentvalueX >0 /*&& (!randomlyfilledin.contains(indexspace) || currentindexspace== indexspace)*/) currentvalueX-=1;
@@ -120,9 +128,11 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
             wait = 0;
             indexspace = ((currentvalueY/40).floor()*10+currentvalueX/40%10.round()).toInt();
             randomlyrequiredhits[randomlyfilledin.indexOf(indexspace)] -=1;
+            score += 1;
             if (randomlyrequiredhits[randomlyfilledin.indexOf(indexspace)] ==0 ){
               randomlyfilledin.remove(indexspace);
               randomlyrequiredhits.remove(0);
+              if(randomlyfilledin.isEmpty) endGame();
             }
 
           }
@@ -138,30 +148,47 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
             //   currentvalueX -= 2;
             indexspace = ((currentvalueY/40).ceil()*10+currentvalueX/40%10.ceil()).toInt();
             randomlyrequiredhits[randomlyfilledin.indexOf(indexspace)] -=1;
+            score += 1;
             if (randomlyrequiredhits[randomlyfilledin.indexOf(indexspace)] ==0 ){
               randomlyfilledin.remove(indexspace);
               randomlyrequiredhits.remove(0);
+              if(randomlyfilledin.isEmpty) endGame();
             }
+
           }
           else
-          if (currentvalueY < 690.0)
+          if (currentvalueY < maxYvalue)
             currentvalueY += 1;
+          else if(score!=0)endGame();
           else up = true;
         }
 
       });
       wait +=1;
-      //indexspace = ((currentvalueY/40).round()*10+currentvalueX/40.round()%10).round().toInt();
+    });
+  }
+  endGame() {
+    timer?.cancel(); // cancel old timer if it exists
+    setState(() {
+      currentvalueX = 0.0;
+      currentvalueY = maxYvalue;
+      randomlyrequiredhits.clear();
+      randomlyfilledin.clear();
+      score = 0;
+      while (randomlyfilledin.length < 20) {
+        int val = random.nextInt(120);
+        if (!randomlyfilledin.contains(val)) {
+          randomlyfilledin.add(val);
+          randomlyrequiredhits.add(random.nextInt(8)+1);
+        }
+      }
+      print(randomlyfilledin);
 
     });
   }
 
   @override
   Widget build(BuildContext context) {
-      //initballX=(MediaQuery.of(context).size.width-45.0)/2;
-    //initballX  = 0.0;
-    //  initballY = MediaQuery.of(context).size.height-130.0;
-     // print(initballY);
     return  new Column(
       children: <Widget>[
         Expanded(
@@ -200,7 +227,82 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
                           onPressed: () {startball();},
                       ),
                     ),
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: Container(
+                        height: 40.0,
+                        width: 100.0,
+                        child: Center(
+                          child: RichText(
+                            text: TextSpan(
+                            text: "$score"
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 0.0,
+                        left: 0.0,
+                        child: Container(
+                          height: 70.0,
+                          width: MediaQuery.of(context).size.width-16.0,
+                          color: Colors.orange,
+                          padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 5.0),
+                          child: Container(
+                            color: Colors.grey,
+                            child: Row(
+                              children: List.generate((5), (i){
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                  child: Center(
+                                    child: Container(
+                                      width: 40.0,
+                                        height: 40.0,
+                                        child: Block(
+                                      location: i,
+                                      requiredhits: i+1,
+                                    )),
+                                  ),
+                                )
+                                ;
+                              }),
+                            ),
+                          ),
+                        )),
+                    Positioned(
+                      top:  position.dy,
+    left: position.dx,
 
+    child: Draggable(
+      child: Container(
+      width: 40.0,
+      height: 40.0,
+      child: Block(
+      location: 0,
+      requiredhits: 0+1,
+      )
+      ),
+      onDraggableCanceled: (velocity, offset){
+        setState(() {
+          int spot = (((offset - appbar).dy/40).round()*10+(offset - appbar).dx/40.ceil()%10).toInt();
+          if (!randomlyfilledin.contains(spot)) {
+            randomlyfilledin.add(spot);
+            randomlyrequiredhits.add(1);
+          }
+        });
+      },
+      feedback: Container(
+          width: 60.0,
+          height: 60.0,
+          child: Block(
+            location: 0,
+            requiredhits: 0+1,
+          )
+      ),
+    ),
+
+                    )
                   ]
               ),
             ),
@@ -226,8 +328,10 @@ class Block extends StatelessWidget {
           border: Border.all(color: Colors.black)
       ),
       child: Center(
-        child: Text(
-          '${requiredhits}',
+        child:RichText(
+    text: TextSpan(
+    text: '${requiredhits}',
+        ),
         ),
       ),
     ) ;
