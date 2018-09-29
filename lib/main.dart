@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:brick_breaker_f/block.dart';
+import 'package:brick_breaker_f/draggableblock.dart';
+import 'package:brick_breaker_f/newblocksrow.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(new MyApp());
@@ -36,8 +39,6 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
 
   List<int> randomlyfilledin = [];
-  double initballX;
-  double initballY;
   Random random;
   List<int> randomlyrequiredhits = [];
   double currentvalueX = 0.0;
@@ -255,61 +256,26 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
                         ),
                       ),
                     ),
+
                     Positioned(
                       bottom: 0.0,
                         left: 0.0,
-                        child: Container(
-                          height: 70.0,
-                          width: MediaQuery.of(context).size.width-16.0,
-                          color: Colors.orange,
-                          padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 5.0),
-                          child: Container(
-                            color: Colors.grey,
-                            child: ListView(
-                              scrollDirection: Axis.horizontal,
-                              children: List.generate((queueblocks.length), (i){
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                  child: Center(
-                                    child:Draggable(
-                                      child: Container(
-                                          width: 40.0,
-                                          height: 40.0,
-                                          child: Block(
-                                            location: i,
-                                            requiredhits: queueblocks[i],
-                                          )
-                                      ),
-                                      onDraggableCanceled: (velocity, offset){
-                                        setState(() {
-                                          int spot = (((offset - appbar).dy/40).round()*10+(offset - appbar).dx/40.ceil()%10).toInt();
-                                          if (!randomlyfilledin.contains(spot)) {
-                                            randomlyfilledin.add(spot);
-                                            randomlyrequiredhits.add(queueblocks[i]);
-                                            queueblocks.removeAt(i);
-                                            //queueblocks.add(random.nextInt(8)+1);
-                                            print(queueblocks);
-                                          }
-
-                                        });
-                                      },
-                                      feedback: Container(
-                                          width: 60.0,
-                                          height: 60.0,
-                                          child: Block(
-                                            location: i,
-                                            requiredhits: queueblocks[i],
-                                          )
-                                      ),
-                                    ),
-
-                                  ),
-                                )
-                                ;
-                              }),
-                            ),
-                          ),
-                        )
+                        child: NewBlocksRow(
+                          queueblocks: queueblocks,
+                          onDraggableCanceled: (offset, i) {
+                            setState(() {
+                              int spot = (((offset - appbar).dy / 40).round() *
+                                  10 + (offset - appbar).dx / 40.ceil() % 10)
+                                  .toInt();
+                              if (!randomlyfilledin.contains(spot)) {
+                                randomlyfilledin.add(spot);
+                                randomlyrequiredhits.add(queueblocks[i]);
+                                queueblocks.removeAt(i);
+                                print(queueblocks);
+                              }
+                            });
+                          }
+                        ),
                     ),
 
                   ]
@@ -320,29 +286,5 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
 
       ],
     );
-  }
-}
-class Block extends StatelessWidget {
-  final int location;
-  final int requiredhits;
-
-  Block({Key key, this.location, this.requiredhits});
-
-  @override
-  Widget build(BuildContext context) {
-    return new Container(
-      decoration: BoxDecoration(
-          color: Color.lerp( Colors.green, Colors.red, requiredhits/8),
-          borderRadius: BorderRadius.circular(3.0),
-          border: Border.all(color: Colors.black)
-      ),
-      child: Center(
-        child:RichText(
-    text: TextSpan(
-    text: '${requiredhits}',
-        ),
-        ),
-      ),
-    ) ;
   }
 }
