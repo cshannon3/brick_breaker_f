@@ -18,7 +18,6 @@ class MyApp extends StatelessWidget {
         appBar:  PreferredSize(
             preferredSize: Size.fromHeight(50.0), // here the desired height
             child: AppBar(
-              // ...
             ),
         ),
         body: new MyHomePage(),
@@ -41,20 +40,21 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
   double initballY;
   Random random;
   List<int> randomlyrequiredhits = [];
-
   double currentvalueX = 0.0;
   double maxYvalue = 620.0;
   double maxXvalue = 360.0;
   double currentvalueY = 620.0;
   int currentindexspace = 0;
   Timer timer;
+  Timer timer2;
   Stopwatch stopwatch = Stopwatch();
+  Stopwatch stopwatch2 = Stopwatch();
   int indexspace = 0;
   int wait = 0;
   Offset position = Offset(18.0, 669.0);
   Offset appbar = Offset(0.0, 100.0);
   int score = 0;
-
+  List<int> queueblocks = [];
 
   bool right  =true;
   bool up = true;
@@ -64,18 +64,27 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
     super.initState();
     random = new Random();
     while (randomlyfilledin.length < 20) {
-      int val = random.nextInt(120);
+      int val = random.nextInt(100);
       if (!randomlyfilledin.contains(val)) {
         randomlyfilledin.add(val);
         randomlyrequiredhits.add(random.nextInt(8)+1);
       }
     }
-    print(randomlyfilledin);
+    while (queueblocks.length < 5){
+      queueblocks.add(random.nextInt(8)+1);
+    }
 
   }
+
    startball() {
     currentvalueX = 0.0;
     currentvalueY = maxYvalue;
+    timer2?.cancel();
+    timer2 = Timer.periodic(Duration(seconds: 2), (Timer timer){
+      setState(() {
+        queueblocks.add(random.nextInt(8)+1);
+      });
+    });
     timer?.cancel(); // cancel old timer if it exists
     //Start new timer
     timer = Timer.periodic(Duration(milliseconds:  2), (Timer timer){
@@ -96,7 +105,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
               }
 
           }
-
           else if (currentvalueX < maxXvalue )currentvalueX += 1;
           else {
             right = false;
@@ -169,11 +177,13 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
   }
   endGame() {
     timer?.cancel(); // cancel old timer if it exists
+    timer2?.cancel();
     setState(() {
       currentvalueX = 0.0;
       currentvalueY = maxYvalue;
       randomlyrequiredhits.clear();
       randomlyfilledin.clear();
+      queueblocks.clear();
       score = 0;
       while (randomlyfilledin.length < 20) {
         int val = random.nextInt(120);
@@ -182,6 +192,10 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
           randomlyrequiredhits.add(random.nextInt(8)+1);
         }
       }
+      while (queueblocks.length < 5){
+        queueblocks.add(random.nextInt(8)+1);
+      }
+      print(queueblocks);
       print(randomlyfilledin);
 
     });
@@ -251,58 +265,53 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin{
                           padding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 5.0),
                           child: Container(
                             color: Colors.grey,
-                            child: Row(
-                              children: List.generate((5), (i){
+                            child: ListView(
+                              scrollDirection: Axis.horizontal,
+                              children: List.generate((queueblocks.length), (i){
                                 return Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                                   child: Center(
-                                    child: Container(
-                                      width: 40.0,
-                                        height: 40.0,
-                                        child: Block(
-                                      location: i,
-                                      requiredhits: i+1,
-                                    )),
+                                    child:Draggable(
+                                      child: Container(
+                                          width: 40.0,
+                                          height: 40.0,
+                                          child: Block(
+                                            location: i,
+                                            requiredhits: queueblocks[i],
+                                          )
+                                      ),
+                                      onDraggableCanceled: (velocity, offset){
+                                        setState(() {
+                                          int spot = (((offset - appbar).dy/40).round()*10+(offset - appbar).dx/40.ceil()%10).toInt();
+                                          if (!randomlyfilledin.contains(spot)) {
+                                            randomlyfilledin.add(spot);
+                                            randomlyrequiredhits.add(queueblocks[i]);
+                                            queueblocks.removeAt(i);
+                                            //queueblocks.add(random.nextInt(8)+1);
+                                            print(queueblocks);
+                                          }
+
+                                        });
+                                      },
+                                      feedback: Container(
+                                          width: 60.0,
+                                          height: 60.0,
+                                          child: Block(
+                                            location: i,
+                                            requiredhits: queueblocks[i],
+                                          )
+                                      ),
+                                    ),
+
                                   ),
                                 )
                                 ;
                               }),
                             ),
                           ),
-                        )),
-                    Positioned(
-                      top:  position.dy,
-    left: position.dx,
+                        )
+                    ),
 
-    child: Draggable(
-      child: Container(
-      width: 40.0,
-      height: 40.0,
-      child: Block(
-      location: 0,
-      requiredhits: 0+1,
-      )
-      ),
-      onDraggableCanceled: (velocity, offset){
-        setState(() {
-          int spot = (((offset - appbar).dy/40).round()*10+(offset - appbar).dx/40.ceil()%10).toInt();
-          if (!randomlyfilledin.contains(spot)) {
-            randomlyfilledin.add(spot);
-            randomlyrequiredhits.add(1);
-          }
-        });
-      },
-      feedback: Container(
-          width: 60.0,
-          height: 60.0,
-          child: Block(
-            location: 0,
-            requiredhits: 0+1,
-          )
-      ),
-    ),
-
-                    )
                   ]
               ),
             ),
