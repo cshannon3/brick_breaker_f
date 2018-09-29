@@ -1,14 +1,14 @@
 
 
+import 'package:brick_breaker_f/blockcontroller.dart';
 import 'package:brick_breaker_f/draggableblock.dart';
 import 'package:flutter/material.dart';
 
 class NewBlocksRow extends StatelessWidget {
-  final List<int> queueblocks;
-  final Function(Offset, int)  onDraggableCanceled;
-
-  const NewBlocksRow({Key key, this.queueblocks, this.onDraggableCanceled}) : super(key: key);
-
+  final BlockController blockController;
+  //final List<int> queueblocks;
+ // final Function(Offset, int)  onDraggableCanceled;
+  const NewBlocksRow({Key key, this.blockController,/*this.queueblocks, this.onDraggableCanceled*/}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -21,25 +21,15 @@ class NewBlocksRow extends StatelessWidget {
         color: Colors.grey,
         child: ListView(
           scrollDirection: Axis.horizontal,
-          children: List.generate((queueblocks.length), (i){
+          children: List.generate((blockController.queueblocks.length), (i){
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Center(
                   child: DraggableBlock(
                     index: i,
-                    requiredhits: queueblocks[i],
+                    requiredhits: blockController.queueblocks[i],
                     onDraggableCanceled: (offset, i) {
-                      onDraggableCanceled(offset, i);
-                     /* setState(() {
-                        int spot = (((offset - appbar).dy/40).round()*10+(offset - appbar).dx/40.ceil()%10).toInt();
-                        if (!randomlyfilledin.contains(spot)) {
-                          randomlyfilledin.add(spot);
-                          randomlyrequiredhits.add(queueblocks[i]);
-                          queueblocks.removeAt(i);
-                          //queueblocks.add(random.nextInt(8)+1);
-                          print(queueblocks);
-                        }
-                      });*/
+                      blockController.onDoneDragging(offset, i);
                     },
                   )
 

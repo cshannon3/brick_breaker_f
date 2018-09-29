@@ -22,17 +22,6 @@ class DraggableBlock extends StatelessWidget {
       ),
       onDraggableCanceled: (velocity, offset){
         onDraggableCanceled(offset, index);
-        /*setState(() {
-          int spot = (((offset - appbar).dy/40).round()*10+(offset - appbar).dx/40.ceil()%10).toInt();
-          if (!randomlyfilledin.contains(spot)) {
-            randomlyfilledin.add(spot);
-            randomlyrequiredhits.add(queueblocks[i]);
-            queueblocks.removeAt(i);
-            //queueblocks.add(random.nextInt(8)+1);
-            print(queueblocks);
-          }
-
-        });*/
       },
       feedback: Container(
           width: 60.0,
